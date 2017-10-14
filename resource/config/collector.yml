@@ -1,0 +1,11 @@
+interval: 20
+events-publisher:
+  host: 172.17.0.1
+  port: 9092
+hosts:
+  - host: 192.168.122.136
+    user: IEUser
+    password: Passw0rd!
+logs:
+  - Security
+  - Microsoft-Windows-DNS-Client/Operational

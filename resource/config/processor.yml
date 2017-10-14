@@ -1,0 +1,6 @@
+interval: 20
+events-receiver:
+  host: 172.17.0.1
+  port: 9092
+engine:
+  constructs: "/home/noxdafox/development/iocep/rules/constructs.clp"
