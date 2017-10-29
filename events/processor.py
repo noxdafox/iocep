@@ -9,21 +9,20 @@ from events.engine import Engine
 
 
 def receive_events(engine, configuration):
-    count = 0
-    timestamp = time.time()
     receiver = configuration['events-receiver']
     broker = "%s:%s" % (receiver['host'], receiver['port'])
-    consumer = KafkaConsumer('windows-events', bootstrap_servers=broker)
+    stats = {'total': 0, 'processed': 0, 'timestamp': time.time()}
 
     with Engine(configuration['engine']) as engine:
-        for msg in consumer:
-            if engine.process_event(msg.value.decode()):
-                count += 1
+        logging.info("Starting processing Events.")
 
-            if time.time() - timestamp > configuration['interval']:
-                logging.info("Processed %d events.", count)
-                timestamp = time.time()
-                count = 0
+        for msg in KafkaConsumer('windows-events', bootstrap_servers=broker):
+            if engine.process_event(msg.value.decode()):
+                stats['processed'] += 1
+
+            stats['total'] += 1
+
+            stats = report_stats(stats, configuration['interval'])
 
 
 def main():
@@ -50,6 +49,17 @@ def parse_arguments():
                         help='log in debug mode')
 
     return parser.parse_args()
+
+
+def report_stats(stats, interval):
+    if time.time() - stats['timestamp'] > interval:
+        logging.info("Received %d - Processed %d - Ratio %d%%.",
+                     stats['total'], stats['processed'],
+                     int((stats['processed'] / stats['total']) * 100))
+
+        return {'total': 0, 'processed': 0, 'timestamp': time.time()}
+    else:
+        return stats
 
 
 if __name__ == '__main__':
