@@ -5,8 +5,8 @@ from io import BytesIO
 
 import yaml
 import winrm
+from lxml import etree
 from kafka import KafkaProducer
-from lxml.etree import iterparse, tostring
 
 
 def collect_events(configuration):
@@ -41,10 +41,10 @@ def forward_events(xml_stream, configuration):
     broker = "%s:%s" % (publisher['host'], publisher['port'])
     producer = KafkaProducer(bootstrap_servers=broker)
 
-    events = iterparse(xml_stream, events=['end'], tag='{*}Event')
+    events = etree.iterparse(xml_stream, events=['end'], tag='{*}Event')
 
     for count, element in enumerate(events):
-        producer.send('windows-events', tostring(element[1]))
+        producer.send('windows-events', etree.tostring(element[1]))
 
     producer.flush()
     producer.close()
@@ -57,11 +57,13 @@ def query_windows_events(host, log):
     session = winrm.Session(host['host'], auth=(host['user'], host['password']))
 
     query = session.run_cmd(
-        'wevtutil', ['qe', log, '/bm:%s' % bookmark, '/sbm:%s' % bookmark])
+        'wevtutil', ['qe', '"%s"' % log,
+                     '/bm:"%s"' % bookmark, '/sbm:"%s"' % bookmark])
 
     # first time the host is contacted
     if query.status_code == 2:
-        query = session.run_cmd('wevtutil', ['qe', log, '/sbm:%s' % bookmark])
+        query = session.run_cmd(
+            'wevtutil', ['qe', '"%s"' % log, '/sbm:"%s"' % bookmark])
 
     if query.status_code != 0:
         raise RuntimeError(query.status_code, query.std_err)
