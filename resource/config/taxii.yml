@@ -1,0 +1,16 @@
+ioc_rules: "/home/noxdafox/development/iocep/rules/iocs_large.clp"
+repositories:
+  - name: alienvault
+    client:
+      host: otx.alienvault.com
+      use_https: true
+      discovery_path: taxii/discovery
+  - name: hailataxii
+    client:
+      host: hailataxii.com
+      use_https: false
+      discovery_path: taxii-discovery-service
+    # exclusions:
+    #   - "guest.blutmagie_de_torExits"
+    #   - "guest.dataForLast_7daysOnly"
+    #   - "guest.phishtank_com"
