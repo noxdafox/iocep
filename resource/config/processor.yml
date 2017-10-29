@@ -4,3 +4,4 @@ events-receiver:
   port: 9092
 engine:
   constructs: "/home/noxdafox/development/iocep/rules/constructs.clp"
+  ioc_rules: "/home/noxdafox/development/iocep/rules/iocs.clp"

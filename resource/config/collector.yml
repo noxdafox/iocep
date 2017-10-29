@@ -8,4 +8,5 @@ hosts:
     password: Passw0rd!
 logs:
   - Security
+  - Microsoft-Windows-Sysmon/Operational
   - Microsoft-Windows-DNS-Client/Operational
