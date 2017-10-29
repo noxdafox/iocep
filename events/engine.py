@@ -9,6 +9,7 @@ class Engine:
 
     def __enter__(self):
         self.environment.load(self.configuration['constructs'])
+        self.environment.load(self.configuration['ioc_rules'])
 
         return self
 
@@ -59,8 +60,11 @@ def initialize_instance(instance, event: etree.Element):
     instance['ProcessID'] = system.find('{*}Execution').attrib['ProcessID']
     instance['TimeCreated'] = system.find('{*}TimeCreated').attrib['SystemTime']
 
-    for slot in (s.name for s in instance.instance_class.slots()):
-        node = data.find('{*}Data[@Name="%s"]' % slot)
+    for slot in (s for s in instance.instance_class.slots()):
+        node = data.find('{*}Data[@Name="%s"]' % slot.name)
 
         if node is not None and node.text is not None:
-            instance[slot] = node.text
+            if slot.facets[0] == 'SGL':
+                instance[slot.name] = node.text
+            # else:
+            #     instance[slot.name] = node.text.split(',')
